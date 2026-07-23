@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "كابتن المايسترو",
+    "slug": "maestro-captain",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#0D0D0D" },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "محتاجين موقعك عشان العميل يتابع الكابتن لحظة بلحظة"
+      }
+    },
+    "android": {
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "extra": {
+      "apiBase": "http://localhost:4000"
+    }
+  }
+}

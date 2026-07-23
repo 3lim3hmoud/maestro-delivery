@@ -1,0 +1,29 @@
+# Render.com blueprint — deploy with "New > Blueprint" and point it at this repo.
+services:
+  - type: web
+    name: maestro-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_DEFAULT_PASSWORD
+        sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+
+  - type: web
+    name: maestro-restaurant-web
+    env: static
+    rootDir: restaurant-web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE
+        fromService:
+          name: maestro-backend
+          type: web
+          property: hostport
