@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Linking } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { io } from "socket.io-client";
-import { API_BASE } from "../api.js";
+import { API_BASE, rateOrder } from "../api.js";
 import { colors, radius, spacing, typography, shadow, gradients } from "../theme.js";
 import { LogoMark } from "../components/Logo.jsx";
 
@@ -17,6 +17,9 @@ const STEPS = [
 export default function TrackingScreen({ order, onNewOrder }) {
   const [status, setStatus] = useState(order.status);
   const [courierLocation, setCourierLocation] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [ratingSent, setRatingSent] = useState(false);
+  const [ratingLoading, setRatingLoading] = useState(false);
 
   useEffect(() => {
     const socket = io(API_BASE);
@@ -29,6 +32,19 @@ export default function TrackingScreen({ order, onNewOrder }) {
   const currentIndex = STEPS.findIndex((s) => s.key === status);
   const isRejected = status === "rejected";
   const progressPct = isRejected ? 0 : Math.max(0, (currentIndex / (STEPS.length - 1)) * 100);
+
+  async function submitRating(stars) {
+    setRating(stars);
+    setRatingLoading(true);
+    try {
+      await rateOrder(order.id, stars, "");
+      setRatingSent(true);
+    } catch (e) {
+      // Silently ignore — rating is a nice-to-have, not critical to the flow
+    } finally {
+      setRatingLoading(false);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -91,6 +107,25 @@ export default function TrackingScreen({ order, onNewOrder }) {
         </View>
       )}
 
+      {status === "delivered" && !ratingSent && (
+        <View style={[styles.ratingBox, shadow.soft]}>
+          <Text style={styles.ratingTitle}>قيّم تجربتك مع الكابتن</Text>
+          <View style={styles.starsRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <TouchableOpacity key={n} disabled={ratingLoading} onPress={() => submitRating(n)}>
+                <Text style={[styles.star, n <= rating && styles.starActive]}>★</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {status === "delivered" && ratingSent && (
+        <View style={[styles.ratingBox, shadow.soft]}>
+          <Text style={styles.ratingThanks}>🙏 شكرًا على تقييمك!</Text>
+        </View>
+      )}
+
       <TouchableOpacity activeOpacity={0.9} onPress={onNewOrder} style={{ marginTop: "auto" }}>
         <LinearGradient colors={gradients.primary} style={[styles.newOrderBtn, shadow.glow]}>
           <Text style={styles.newOrderText}>طلب جديد</Text>
@@ -141,6 +176,15 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.danger, marginBottom: spacing.md,
   },
   rejectedText: { color: colors.danger, flex: 1, textAlign: "right", fontWeight: "600" },
+  ratingBox: {
+    padding: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg,
+    borderWidth: 1, borderColor: colors.line, marginBottom: spacing.md, alignItems: "center", gap: 10,
+  },
+  ratingTitle: { color: colors.white, fontWeight: "700", fontSize: 15 },
+  starsRow: { flexDirection: "row", gap: 6 },
+  star: { fontSize: 32, color: colors.line },
+  starActive: { color: colors.primary },
+  ratingThanks: { color: colors.success, fontWeight: "700", fontSize: 15 },
   newOrderBtn: { padding: 17, borderRadius: radius.pill, alignItems: "center" },
   newOrderText: { color: "#1a1400", fontWeight: "800", fontSize: 16 },
 });

@@ -5,9 +5,17 @@ import { getRestaurants } from "../api.js";
 import { colors, radius, spacing, typography, shadow, gradients } from "../theme.js";
 import { LogoMark } from "../components/Logo.jsx";
 
-const CUISINE_EMOJI = { rest_koshary_masr: "🍝", rest_grill_house: "🍢" };
+const CUISINE_EMOJI = {
+  rest_afandina: "🍝",
+  rest_la_rose: "🍕",
+  rest_la_rotonda: "🍝",
+  rest_lorenzo: "🍕",
+  rest_belban: "🍮",
+  rest_kunafa_basbousa: "🍮",
+  rest_hadramout: "🍛",
+};
 
-export default function RestaurantListScreen({ onSelect }) {
+export default function RestaurantListScreen({ onSelect, onOpenHistory }) {
   const [restaurants, setRestaurants] = useState([]);
   const [query, setQuery] = useState("");
 
@@ -22,9 +30,9 @@ export default function RestaurantListScreen({ onSelect }) {
       <LinearGradient colors={gradients.dark} style={styles.header}>
         <View style={styles.headerTop}>
           <LogoMark size={38} />
-          <View style={styles.locationPill}>
-            <Text style={styles.locationPillText}>📍 موقعك الحالي</Text>
-          </View>
+          <TouchableOpacity style={styles.locationPill} onPress={onOpenHistory}>
+            <Text style={styles.locationPillText}>📋 طلباتي</Text>
+          </TouchableOpacity>
         </View>
         <Text style={styles.greeting}>عايز تاكل إيه النهاردة؟</Text>
         <Text style={styles.tagline}>مطاعمك المفضلة على بعد دقايق منك</Text>

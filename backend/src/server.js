@@ -45,6 +45,7 @@ function rowToOrder(row) {
   return {
     id: row.id,
     restaurantId: row.restaurant_id,
+    restaurantName: row.restaurant_name || undefined,
     courierId: row.courier_id,
     items: JSON.parse(row.items_json),
     total: row.total,
@@ -54,6 +55,8 @@ function rowToOrder(row) {
     location: { lat: row.lat, lng: row.lng },
     mapsUrl: row.maps_url,
     status: row.status,
+    courierRating: row.courier_rating || null,
+    ratingComment: row.rating_comment || null,
     createdAt: row.created_at,
   };
 }
@@ -127,9 +130,42 @@ app.post("/api/orders", orderLimiter, (req, res) => {
 });
 
 app.get("/api/orders/:id", (req, res) => {
-  const row = db.prepare("SELECT * FROM orders WHERE id = ?").get(req.params.id);
+  const row = db.prepare(`
+    SELECT o.*, r.name AS restaurant_name FROM orders o
+    JOIN restaurants r ON r.id = o.restaurant_id
+    WHERE o.id = ?
+  `).get(req.params.id);
   if (!row) return res.status(404).json({ error: "الأوردر غير موجود" });
   res.json(rowToOrder(row));
+});
+
+// Customer order history — identified by phone number (no login system for customers yet)
+app.get("/api/customers/orders", (req, res) => {
+  const { phone } = req.query;
+  if (!phone) return res.status(400).json({ error: "رقم الهاتف مطلوب" });
+  const rows = db.prepare(`
+    SELECT o.*, r.name AS restaurant_name FROM orders o
+    JOIN restaurants r ON r.id = o.restaurant_id
+    WHERE o.customer_phone = ?
+    ORDER BY o.created_at DESC
+  `).all(phone);
+  res.json(rows.map(rowToOrder));
+});
+
+// Rate the courier/delivery experience — only allowed once the order is delivered
+app.post("/api/orders/:id/rate", (req, res) => {
+  const { rating, comment } = req.body;
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: "التقييم لازم يكون من 1 لـ 5" });
+  }
+  const row = db.prepare("SELECT * FROM orders WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "الأوردر غير موجود" });
+  if (row.status !== "delivered") {
+    return res.status(400).json({ error: "التقييم متاح بس بعد استلام الأوردر" });
+  }
+  db.prepare("UPDATE orders SET courier_rating = ?, rating_comment = ? WHERE id = ?")
+    .run(rating, comment || null, req.params.id);
+  res.json({ ok: true });
 });
 
 // ================= Restaurant dashboard (JWT-protected) =================

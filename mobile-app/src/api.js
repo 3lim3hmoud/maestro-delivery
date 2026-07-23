@@ -16,3 +16,19 @@ export async function placeOrder(payload) {
   if (!res.ok) throw new Error((await res.json()).error || "حصل خطأ في إرسال الطلب");
   return res.json();
 }
+
+export async function getCustomerOrders(phone) {
+  const res = await fetch(`${API_BASE}/api/customers/orders?phone=${encodeURIComponent(phone)}`);
+  if (!res.ok) throw new Error((await res.json()).error || "حصل خطأ في جلب طلباتك السابقة");
+  return res.json();
+}
+
+export async function rateOrder(orderId, rating, comment) {
+  const res = await fetch(`${API_BASE}/api/orders/${orderId}/rate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rating, comment }),
+  });
+  if (!res.ok) throw new Error((await res.json()).error || "حصل خطأ في إرسال التقييم");
+  return res.json();
+}

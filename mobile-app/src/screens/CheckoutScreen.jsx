@@ -6,11 +6,11 @@ import usePushToken from "../usePush.js";
 import { placeOrder } from "../api.js";
 import { colors, radius, spacing, typography, shadow, gradients } from "../theme.js";
 
-export default function CheckoutScreen({ cart, onBack, onPlaced }) {
+export default function CheckoutScreen({ cart, onBack, onPlaced, initialName = "", initialPhone = "", onSaveProfile }) {
   const { location, error: locationError, loading: locating } = useLocation();
   const pushToken = usePushToken();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(initialName);
+  const [phone, setPhone] = useState(initialPhone);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +32,7 @@ export default function CheckoutScreen({ cart, onBack, onPlaced }) {
         paymentMethod,
         pushToken,
       });
+      if (onSaveProfile) onSaveProfile(name, phone);
       onPlaced(order);
     } catch (e) {
       setError(e.message);

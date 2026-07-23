@@ -60,6 +60,15 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 `);
 
+// ---------- Safe migrations (add columns to pre-existing databases) ----------
+const orderCols = db.prepare("PRAGMA table_info(orders)").all().map((c) => c.name);
+if (!orderCols.includes("courier_rating")) {
+  db.exec("ALTER TABLE orders ADD COLUMN courier_rating INTEGER");
+}
+if (!orderCols.includes("rating_comment")) {
+  db.exec("ALTER TABLE orders ADD COLUMN rating_comment TEXT");
+}
+
 // ---------- Seed (only runs once, on an empty database) ----------
 const restaurantCount = db.prepare("SELECT COUNT(*) AS c FROM restaurants").get().c;
 if (restaurantCount === 0) {
@@ -75,37 +84,80 @@ if (restaurantCount === 0) {
     {
       id: "rest_afandina", name: "أفندينا", code: "1001", password: "1001",
       phone: "01000000001", lat: 30.0444, lng: 31.2357,
-      menu: [],
+      menu: [
+        { id: "af1", name: "كشري كبير", price: 40 },
+        { id: "af2", name: "كشري وسط", price: 30 },
+        { id: "af3", name: "كشري صغير", price: 20 },
+        { id: "af4", name: "دقة زيادة", price: 5 },
+        { id: "af5", name: "بطاطس محمرة", price: 25 },
+      ],
     },
     {
       id: "rest_la_rose", name: "لاروز", code: "1002", password: "1002",
       phone: "01000000002", lat: 30.0470, lng: 31.2360,
-      menu: [],
+      menu: [
+        { id: "lr1", name: "بيتزا مارجريتا", price: 85 },
+        { id: "lr2", name: "بيتزا فراخ باربكيو", price: 110 },
+        { id: "lr3", name: "كريب نوتيلا", price: 55 },
+        { id: "lr4", name: "وافل بالفواكه", price: 65 },
+        { id: "lr5", name: "عصير فريش", price: 35 },
+        { id: "lr6", name: "كابتشينو", price: 30 },
+      ],
     },
     {
       id: "rest_la_rotonda", name: "لاروتندا", code: "1003", password: "1003",
       phone: "01000000003", lat: 30.0500, lng: 31.2400,
-      menu: [],
+      menu: [
+        { id: "lt1", name: "باستا بيشاميل", price: 90 },
+        { id: "lt2", name: "باستا الفريدو بالفراخ", price: 100 },
+        { id: "lt3", name: "بيتزا سي فوود", price: 130 },
+        { id: "lt4", name: "سلطة سيزر", price: 60 },
+        { id: "lt5", name: "عصير طازة", price: 30 },
+      ],
     },
     {
       id: "rest_lorenzo", name: "لورينزو", code: "1004", password: "1004",
       phone: "01000000004", lat: 30.0530, lng: 31.2430,
-      menu: [],
+      menu: [
+        { id: "lz1", name: "بيتزا بيبروني", price: 100 },
+        { id: "lz2", name: "لازانيا لحمة", price: 120 },
+        { id: "lz3", name: "ريزوتو مشروم", price: 95 },
+        { id: "lz4", name: "تيراميسو", price: 45 },
+        { id: "lz5", name: "مياه غازية", price: 15 },
+      ],
     },
     {
       id: "rest_belban", name: "بلبن", code: "1005", password: "1005",
       phone: "01000000005", lat: 30.0560, lng: 31.2460,
-      menu: [],
+      menu: [
+        { id: "bl1", name: "رز بلبن", price: 25 },
+        { id: "bl2", name: "أرز بالحليب بالمكسرات", price: 30 },
+        { id: "bl3", name: "مهلبية", price: 20 },
+        { id: "bl4", name: "أم علي", price: 35 },
+        { id: "bl5", name: "قشطة بالعسل", price: 30 },
+      ],
     },
     {
       id: "rest_kunafa_basbousa", name: "كنافة وبسبوسة", code: "1006", password: "1006",
       phone: "01000000006", lat: 30.0590, lng: 31.2480,
-      menu: [],
+      menu: [
+        { id: "kb1", name: "كنافة بالقشطة (كيلو)", price: 150 },
+        { id: "kb2", name: "كنافة بالمكسرات (كيلو)", price: 180 },
+        { id: "kb3", name: "بسبوسة بالقشطة (كيلو)", price: 120 },
+        { id: "kb4", name: "قطايف مقلية", price: 60 },
+        { id: "kb5", name: "بلح الشام", price: 55 },
+      ],
     },
     {
       id: "rest_hadramout", name: "حضرموت", code: "1007", password: "1007",
       phone: "01000000007", lat: 30.0620, lng: 31.2500,
-      menu: [],
+      menu: [
+        { id: "hd1", name: "مندي فراخ", price: 110 },
+        { id: "hd2", name: "مندي لحمة", price: 150 },
+        { id: "hd3", name: "مظبي فراخ", price: 120 },
+        { id: "hd4", name: "شوربة يمنية", price: 30 },
+        { id: "hd5", name: "سلطة يمنية", price: 25 },
+      ],
     },
   ];
 
