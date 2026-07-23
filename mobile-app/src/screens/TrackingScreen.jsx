@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Linking } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { io } from "socket.io-client";
 import { API_BASE } from "../api.js";
-import { colors, radius } from "../theme.js";
+import { colors, radius, spacing, typography, shadow, gradients } from "../theme.js";
 import { LogoMark } from "../components/Logo.jsx";
 
 const STEPS = [
-  { key: "pending", label: "بانتظار موافقة المطعم", note: "♩" },
-  { key: "accepted", label: "المطعم وافق على طلبك", note: "♪" },
-  { key: "preparing", label: "جارٍ تحضير طلبك", note: "♫" },
-  { key: "out_for_delivery", label: "الدليفري في الطريق ليك", note: "⚡" },
-  { key: "delivered", label: "تم التسليم، بالهنا والشفا", note: "✓" },
+  { key: "pending", label: "بانتظار موافقة المطعم", icon: "🕐" },
+  { key: "accepted", label: "المطعم وافق على طلبك", icon: "✅" },
+  { key: "preparing", label: "جارٍ تحضير طلبك", icon: "👨‍🍳" },
+  { key: "out_for_delivery", label: "الدليفري في الطريق ليك", icon: "🛵" },
+  { key: "delivered", label: "تم التسليم، بالهنا والشفا", icon: "🎉" },
 ];
 
 export default function TrackingScreen({ order, onNewOrder }) {
@@ -26,32 +27,47 @@ export default function TrackingScreen({ order, onNewOrder }) {
   }, [order.id]);
 
   const currentIndex = STEPS.findIndex((s) => s.key === status);
+  const isRejected = status === "rejected";
+  const progressPct = isRejected ? 0 : Math.max(0, (currentIndex / (STEPS.length - 1)) * 100);
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <LogoMark size={36} />
+      <LinearGradient colors={gradients.dark} style={styles.header}>
+        <LogoMark size={34} />
         <Text style={styles.title}>متابعة الطلب</Text>
-        <Text style={styles.orderId}>{order.id}</Text>
+        <View style={styles.orderIdPill}>
+          <Text style={styles.orderId}>{order.id}</Text>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.progressTrack}>
+        <View style={styles.progressBg} />
+        <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
       </View>
 
       <View style={styles.timeline}>
         {STEPS.map((step, i) => {
-          const active = i <= currentIndex;
-          const isDelivered = step.key === "delivered" && active;
-          const isRejected = status === "rejected";
+          const active = i <= currentIndex && !isRejected;
+          const isCurrent = i === currentIndex && !isRejected;
+          const isDone = i < currentIndex && !isRejected;
           return (
             <View key={step.key} style={styles.stepRow}>
-              <View
-                style={[
-                  styles.noteCircle,
-                  active && !isRejected && styles.noteCircleActive,
-                  isDelivered && styles.noteCircleDone,
-                ]}
-              >
-                <Text style={styles.noteChar}>{step.note}</Text>
+              {active ? (
+                <LinearGradient
+                  colors={isDone ? [colors.success, colors.success] : gradients.primary}
+                  style={[styles.iconCircle, isCurrent && shadow.glow]}
+                >
+                  <Text style={styles.iconChar}>{step.icon}</Text>
+                </LinearGradient>
+              ) : (
+                <View style={styles.iconCircleIdle}>
+                  <Text style={styles.iconCharIdle}>{step.icon}</Text>
+                </View>
+              )}
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.stepLabel, active && styles.stepLabelActive]}>{step.label}</Text>
+                {isCurrent && <Text style={styles.stepLive}>جارٍ الآن...</Text>}
               </View>
-              <Text style={[styles.stepLabel, active && !isRejected && styles.stepLabelActive]}>{step.label}</Text>
             </View>
           );
         })}
@@ -59,49 +75,72 @@ export default function TrackingScreen({ order, onNewOrder }) {
 
       {status === "out_for_delivery" && courierLocation && (
         <TouchableOpacity
-          style={styles.courierBox}
+          activeOpacity={0.9}
+          style={[styles.courierBox, shadow.soft]}
           onPress={() => Linking.openURL(`https://www.google.com/maps?q=${courierLocation.lat},${courierLocation.lng}`)}
         >
-          <Text style={styles.courierText}>🛵 شوف مكان الكابتن دلوقتي على الخريطة</Text>
+          <Text style={{ fontSize: 22 }}>🛵</Text>
+          <Text style={styles.courierText}>شوف مكان الكابتن دلوقتي على الخريطة</Text>
         </TouchableOpacity>
       )}
 
-      {status === "rejected" && (
-        <View style={styles.rejectedBox}>
+      {isRejected && (
+        <View style={[styles.rejectedBox, shadow.soft]}>
+          <Text style={{ fontSize: 22 }}>😔</Text>
           <Text style={styles.rejectedText}>للأسف المطعم مقدرش يستقبل طلبك دلوقتي</Text>
         </View>
       )}
 
-      <TouchableOpacity style={styles.newOrderBtn} onPress={onNewOrder}>
-        <Text style={styles.newOrderText}>طلب جديد</Text>
+      <TouchableOpacity activeOpacity={0.9} onPress={onNewOrder} style={{ marginTop: "auto" }}>
+        <LinearGradient colors={gradients.primary} style={[styles.newOrderBtn, shadow.glow]}>
+          <Text style={styles.newOrderText}>طلب جديد</Text>
+        </LinearGradient>
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgBlack },
+  container: { flex: 1, backgroundColor: colors.bg, padding: spacing.lg },
   header: {
-    backgroundColor: colors.bgBlackSoft, padding: 24, alignItems: "center", gap: 8,
-    borderBottomWidth: 1, borderBottomColor: colors.line,
+    alignItems: "center", gap: 8, padding: spacing.lg, margin: -spacing.lg, marginBottom: spacing.lg,
+    borderBottomLeftRadius: radius.xl, borderBottomRightRadius: radius.xl,
   },
-  title: { color: colors.white, fontSize: 20, fontWeight: "900" },
-  orderId: { color: colors.textSoft, marginTop: 2, fontFamily: "monospace" },
-  timeline: { padding: 24 },
-  stepRow: { flexDirection: "row-reverse", alignItems: "center", gap: 14, marginBottom: 22 },
-  noteCircle: {
-    width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surface,
-    borderWidth: 2, borderColor: colors.line, alignItems: "center", justifyContent: "center",
+  title: { ...typography.h2, color: colors.white, marginTop: 4 },
+  orderIdPill: {
+    backgroundColor: "rgba(255,255,255,0.08)", paddingHorizontal: 14, paddingVertical: 5,
+    borderRadius: radius.pill, marginTop: 4,
   },
-  noteCircleActive: { backgroundColor: colors.boltYellow, borderColor: colors.boltYellow },
-  noteCircleDone: { backgroundColor: colors.goGreen, borderColor: colors.goGreen },
-  noteChar: { fontSize: 18 },
-  stepLabel: { fontSize: 15, color: colors.textSoft, textAlign: "right", flex: 1 },
+  orderId: { color: colors.textSoft, fontFamily: "monospace", fontSize: 12.5 },
+  progressTrack: { height: 6, borderRadius: 3, marginBottom: spacing.lg, overflow: "hidden" },
+  progressBg: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.surfaceAlt, borderRadius: 3 },
+  progressFill: { height: 6, backgroundColor: colors.primary, borderRadius: 3 },
+  timeline: { marginBottom: spacing.lg },
+  stepRow: { flexDirection: "row-reverse", alignItems: "center", gap: spacing.md, marginBottom: spacing.lg },
+  iconCircle: {
+    width: 46, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center",
+  },
+  iconCircleIdle: {
+    width: 46, height: 46, borderRadius: 23, backgroundColor: colors.surface,
+    borderWidth: 1, borderColor: colors.line, alignItems: "center", justifyContent: "center",
+  },
+  iconChar: { fontSize: 20 },
+  iconCharIdle: { fontSize: 20, opacity: 0.35 },
+  stepLabel: { fontSize: 15, color: colors.textFaint, textAlign: "right", fontWeight: "600" },
   stepLabelActive: { color: colors.white, fontWeight: "700" },
-  courierBox: { margin: 24, marginTop: 0, padding: 14, backgroundColor: "rgba(77,166,255,0.12)", borderRadius: radius.md, borderWidth: 1, borderColor: colors.infoBlue },
-  courierText: { color: colors.infoBlue, textAlign: "center", fontWeight: "700" },
-  rejectedBox: { margin: 24, padding: 16, backgroundColor: "rgba(255,77,77,0.12)", borderRadius: radius.md, borderWidth: 1, borderColor: colors.danger },
-  rejectedText: { color: colors.danger, textAlign: "right" },
-  newOrderBtn: { margin: 24, padding: 16, backgroundColor: colors.boltYellow, borderRadius: radius.md, alignItems: "center" },
-  newOrderText: { color: "#1a1400", fontWeight: "700", fontSize: 16 },
+  stepLive: { color: colors.primary, fontSize: 12, textAlign: "right", marginTop: 2, fontWeight: "700" },
+  courierBox: {
+    flexDirection: "row-reverse", alignItems: "center", gap: 10,
+    padding: spacing.md, backgroundColor: colors.infoBg, borderRadius: radius.lg,
+    borderWidth: 1, borderColor: colors.info, marginBottom: spacing.md,
+  },
+  courierText: { color: colors.info, fontWeight: "700", flex: 1, textAlign: "right" },
+  rejectedBox: {
+    flexDirection: "row-reverse", alignItems: "center", gap: 10,
+    padding: spacing.md, backgroundColor: colors.dangerBg, borderRadius: radius.lg,
+    borderWidth: 1, borderColor: colors.danger, marginBottom: spacing.md,
+  },
+  rejectedText: { color: colors.danger, flex: 1, textAlign: "right", fontWeight: "600" },
+  newOrderBtn: { padding: 17, borderRadius: radius.pill, alignItems: "center" },
+  newOrderText: { color: "#1a1400", fontWeight: "800", fontSize: 16 },
 });
