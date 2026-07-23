@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator, ScrollView } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import useLocation from "../useLocation.js";
 import usePushToken from "../usePush.js";
 import { placeOrder } from "../api.js";
-import { colors, radius } from "../theme.js";
+import { colors, radius, spacing, typography, shadow, gradients } from "../theme.js";
 
 export default function CheckoutScreen({ cart, onBack, onPlaced }) {
   const { location, error: locationError, loading: locating } = useLocation();
@@ -27,9 +28,9 @@ export default function CheckoutScreen({ cart, onBack, onPlaced }) {
         items: cart.items,
         customerName: name,
         customerPhone: phone,
-        location, // GPS location attached automatically to every order
+        location,
         paymentMethod,
-        pushToken, // so the backend can notify this phone even if the app is closed
+        pushToken,
       });
       onPlaced(order);
     } catch (e) {
@@ -42,56 +43,71 @@ export default function CheckoutScreen({ cart, onBack, onPlaced }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack}><Text style={styles.back}>‹ رجوع</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.backBtn} onPress={onBack}>
+          <Text style={styles.backArrow}>›</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>تأكيد الطلب</Text>
       </View>
 
-      <View style={{ padding: 20 }}>
-        <Text style={styles.label}>الاسم</Text>
-        <TextInput
-          style={styles.input} value={name} onChangeText={setName}
-          placeholder="اسمك" placeholderTextColor={colors.textSoft} textAlign="right"
-        />
+      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 140 }}>
+        <View style={[styles.card, shadow.soft]}>
+          <Text style={styles.cardHeading}>بياناتك</Text>
+          <Text style={styles.label}>الاسم</Text>
+          <TextInput
+            style={styles.input} value={name} onChangeText={setName}
+            placeholder="اسمك بالكامل" placeholderTextColor={colors.textFaint} textAlign="right"
+          />
+          <Text style={styles.label}>رقم الموبايل</Text>
+          <TextInput
+            style={styles.input} value={phone} onChangeText={setPhone}
+            placeholder="01xxxxxxxxx" placeholderTextColor={colors.textFaint}
+            keyboardType="phone-pad" textAlign="right"
+          />
+        </View>
 
-        <Text style={styles.label}>رقم الموبايل</Text>
-        <TextInput
-          style={styles.input} value={phone} onChangeText={setPhone}
-          placeholder="01xxxxxxxxx" placeholderTextColor={colors.textSoft}
-          keyboardType="phone-pad" textAlign="right"
-        />
-
-        <View style={styles.locationBox}>
+        <View style={[styles.card, shadow.soft]}>
+          <Text style={styles.cardHeading}>موقع التوصيل</Text>
           {locating && (
             <View style={styles.locationRow}>
-              <ActivityIndicator color={colors.boltYellow} />
+              <ActivityIndicator color={colors.primary} />
               <Text style={styles.locationText}>جارٍ تحديد موقعك...</Text>
             </View>
           )}
           {!locating && location && (
-            <Text style={styles.locationOk}>📍 تم تحديد موقعك بنجاح، هيتبعت مع الطلب أوتوماتيك</Text>
+            <View style={styles.locationOkRow}>
+              <Text style={styles.locationOk}>تم تحديد موقعك بنجاح، هيتبعت مع الطلب أوتوماتيك</Text>
+              <Text style={{ fontSize: 20 }}>📍</Text>
+            </View>
           )}
           {!locating && locationError && (
             <Text style={styles.locationErr}>⚠️ {locationError}</Text>
           )}
         </View>
 
-        <Text style={styles.label}>وسيلة الدفع</Text>
-        <View style={styles.paymentRow}>
-          <View style={[styles.paymentOption, styles.paymentOptionActive]}>
-            <Text style={[styles.paymentText, styles.paymentTextActive]}>كاش عند الاستلام</Text>
+        <View style={[styles.card, shadow.soft]}>
+          <Text style={styles.cardHeading}>وسيلة الدفع</Text>
+          <View style={styles.paymentOption}>
+            <Text style={{ fontSize: 20 }}>💵</Text>
+            <Text style={styles.paymentText}>كاش عند الاستلام</Text>
+            <View style={styles.radioActive}><View style={styles.radioDot} /></View>
           </View>
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
+      </ScrollView>
 
+      <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.submitBtn, (submitting || !location) && { opacity: 0.6 }]}
+          activeOpacity={0.9}
           disabled={submitting || !location}
           onPress={submit}
+          style={{ opacity: submitting || !location ? 0.6 : 1 }}
         >
-          <Text style={styles.submitText}>
-            {submitting ? "جارٍ الإرسال..." : `تأكيد الطلب — ${cart.total} ج.م`}
-          </Text>
+          <LinearGradient colors={gradients.primary} style={[styles.submitBtn, shadow.glow]}>
+            <Text style={styles.submitText}>
+              {submitting ? "جارٍ الإرسال..." : `تأكيد الطلب — ${cart.total} ج.م`}
+            </Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -99,34 +115,49 @@ export default function CheckoutScreen({ cart, onBack, onPlaced }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgBlack },
+  container: { flex: 1, backgroundColor: colors.bg },
   header: {
-    backgroundColor: colors.bgBlackSoft, padding: 20,
+    backgroundColor: colors.bgElevated, padding: spacing.lg,
     flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between",
     borderBottomWidth: 1, borderBottomColor: colors.line,
   },
-  back: { color: colors.boltYellow, fontSize: 16 },
-  title: { color: colors.white, fontSize: 19, fontWeight: "700" },
-  label: { fontSize: 13, color: colors.textSoft, textAlign: "right", marginBottom: 6, marginTop: 14 },
+  backBtn: {
+    width: 38, height: 38, borderRadius: 19, backgroundColor: colors.surface,
+    alignItems: "center", justifyContent: "center",
+  },
+  backArrow: { color: colors.primary, fontSize: 20, fontWeight: "800" },
+  title: { ...typography.h2, color: colors.white },
+  card: {
+    backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md,
+    marginBottom: spacing.md, borderWidth: 1, borderColor: colors.line,
+  },
+  cardHeading: { ...typography.h3, color: colors.white, textAlign: "right", marginBottom: spacing.sm },
+  label: { fontSize: 13, color: colors.textSoft, textAlign: "right", marginBottom: 6, marginTop: 10, fontWeight: "600" },
   input: {
-    backgroundColor: colors.surface, borderRadius: radius.sm, padding: 12, fontSize: 16, color: colors.white,
+    backgroundColor: colors.surfaceAlt, borderRadius: radius.sm, padding: 13, fontSize: 15.5, color: colors.white,
     borderWidth: 1, borderColor: colors.line,
   },
-  locationBox: { marginTop: 20, padding: 14, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.line },
   locationRow: { flexDirection: "row-reverse", alignItems: "center", gap: 10 },
   locationText: { color: colors.textSoft },
-  locationOk: { color: colors.goGreen, textAlign: "right", fontWeight: "600" },
+  locationOkRow: { flexDirection: "row-reverse", alignItems: "center", gap: 10 },
+  locationOk: { color: colors.success, textAlign: "right", fontWeight: "600", flex: 1, fontSize: 13.5 },
   locationErr: { color: colors.danger, textAlign: "right" },
-  error: { color: colors.danger, textAlign: "right", marginTop: 10 },
-  paymentRow: { flexDirection: "row-reverse", gap: 10 },
+  error: { color: colors.danger, textAlign: "right", marginTop: 4, fontWeight: "600" },
   paymentOption: {
-    flex: 1, padding: 12, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.line,
-    backgroundColor: colors.surface, alignItems: "center",
+    flexDirection: "row-reverse", alignItems: "center", gap: 12,
+    padding: 14, borderRadius: radius.md, borderWidth: 1.5, borderColor: colors.primary,
+    backgroundColor: colors.surfaceAlt,
   },
-  paymentOptionActive: { borderColor: colors.boltYellow, backgroundColor: colors.boltYellow + "22" },
-  paymentText: { color: colors.textSoft, fontWeight: "600" },
-  paymentTextActive: { color: colors.white },
-  paymentNote: { color: colors.textSoft, fontSize: 12, textAlign: "right", marginTop: 8 },
-  submitBtn: { backgroundColor: colors.boltYellow, borderRadius: radius.md, padding: 16, alignItems: "center", marginTop: 26 },
-  submitText: { color: "#1a1400", fontSize: 17, fontWeight: "800" },
+  paymentText: { color: colors.white, fontWeight: "700", flex: 1, textAlign: "right", fontSize: 15 },
+  radioActive: {
+    width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.primary,
+    alignItems: "center", justifyContent: "center",
+  },
+  radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.primary },
+  footer: {
+    position: "absolute", left: 0, right: 0, bottom: 0, padding: spacing.lg,
+    backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.line,
+  },
+  submitBtn: { borderRadius: radius.pill, padding: 17, alignItems: "center" },
+  submitText: { color: "#1a1400", fontSize: 16.5, fontWeight: "800" },
 });
