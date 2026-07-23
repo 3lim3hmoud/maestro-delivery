@@ -69,8 +69,12 @@ export default function MenuScreen({ restaurant, onBack, onCheckout }) {
       />
 
       {items.length > 0 && (
-        <TouchableOpacity activeOpacity={0.9} onPress={() => onCheckout({ items, total, restaurantId: restaurant.id })}>
-          <LinearGradient colors={gradients.primary} style={[styles.checkoutBar, shadow.glow]}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={[styles.checkoutBarWrap, shadow.glow]}
+          onPress={() => onCheckout({ items, total, restaurantId: restaurant.id })}
+        >
+          <LinearGradient colors={gradients.primary} style={styles.checkoutBar}>
             <View style={styles.checkoutCountBadge}>
               <Text style={styles.checkoutCountText}>{totalQty}</Text>
             </View>
@@ -122,8 +126,11 @@ const styles = StyleSheet.create({
   },
   qtyBtnMinusText: { fontSize: 18, color: colors.white, fontWeight: "700" },
   qtyText: { fontSize: 16, fontWeight: "800", minWidth: 18, textAlign: "center", color: colors.white },
-  checkoutBar: {
+  checkoutBarWrap: {
     position: "absolute", left: spacing.lg, right: spacing.lg, bottom: spacing.lg,
+    borderRadius: radius.pill,
+  },
+  checkoutBar: {
     flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between",
     borderRadius: radius.pill, paddingVertical: 16, paddingHorizontal: 20,
   },
