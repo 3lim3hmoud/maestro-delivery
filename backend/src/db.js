@@ -73,22 +73,39 @@ if (restaurantCount === 0) {
 
   const seed = [
     {
-      id: "rest_koshary_masr", name: "كشري مصر", code: "1234", password: "1234",
+      id: "rest_afandina", name: "أفندينا", code: "1001", password: "1001",
       phone: "01000000001", lat: 30.0444, lng: 31.2357,
-      menu: [
-        { id: "m1", name: "كشري كبير", price: 45 },
-        { id: "m2", name: "كشري وسط", price: 30 },
-        { id: "m3", name: "بطاطس محمرة", price: 20 },
-      ],
+      menu: [],
     },
     {
-      id: "rest_grill_house", name: "بيت المشويات", code: "5678", password: "5678",
-      phone: "01000000002", lat: 30.0626, lng: 31.2497,
-      menu: [
-        { id: "m4", name: "شيش طاووق", price: 90 },
-        { id: "m5", name: "كفتة مشوية", price: 85 },
-        { id: "m6", name: "أرز بسمتي", price: 15 },
-      ],
+      id: "rest_la_rose", name: "لاروز", code: "1002", password: "1002",
+      phone: "01000000002", lat: 30.0470, lng: 31.2360,
+      menu: [],
+    },
+    {
+      id: "rest_la_rotonda", name: "لاروتندا", code: "1003", password: "1003",
+      phone: "01000000003", lat: 30.0500, lng: 31.2400,
+      menu: [],
+    },
+    {
+      id: "rest_lorenzo", name: "لورينزو", code: "1004", password: "1004",
+      phone: "01000000004", lat: 30.0530, lng: 31.2430,
+      menu: [],
+    },
+    {
+      id: "rest_belban", name: "بلبن", code: "1005", password: "1005",
+      phone: "01000000005", lat: 30.0560, lng: 31.2460,
+      menu: [],
+    },
+    {
+      id: "rest_kunafa_basbousa", name: "كنافة وبسبوسة", code: "1006", password: "1006",
+      phone: "01000000006", lat: 30.0590, lng: 31.2480,
+      menu: [],
+    },
+    {
+      id: "rest_hadramout", name: "حضرموت", code: "1007", password: "1007",
+      phone: "01000000007", lat: 30.0620, lng: 31.2500,
+      menu: [],
     },
   ];
 
@@ -112,7 +129,7 @@ if (restaurantCount === 0) {
   });
   seedTx();
 
-  console.log("🌱 Database seeded. Restaurant codes: 1234/1234, 5678/5678 | Courier: 9999/9999 | Admin: admin/" + (process.env.ADMIN_DEFAULT_PASSWORD || "changeme"));
+  console.log("🌱 Database seeded. Restaurants: أفندينا 1001 | لاروز 1002 | لاروتندا 1003 | لورينزو 1004 | بلبن 1005 | كنافة وبسبوسة 1006 | حضرموت 1007 | Courier: 9999/9999 | Admin: admin/" + (process.env.ADMIN_DEFAULT_PASSWORD || "changeme"));
 }
 
 module.exports = db;
