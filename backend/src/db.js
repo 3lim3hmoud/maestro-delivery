@@ -150,11 +150,11 @@ if (restaurantCount === 0) {
     INSERT INTO menu_items (id, restaurant_id, name, price) VALUES (@id, @restaurant_id, @name, @price)
   `);
 
-  // Launch line-up requested for المايسترو (Alexandria-area demo coordinates).
+  // Launch line-up requested for المايسترو (real coordinates around Sadat City, Menoufia).
   const seed = [
     {
       id: "rest_afandina", name: "أفندينا", code: "1001", password: "1001",
-      phone: "01000000011", lat: 31.2001, lng: 29.9187,
+      phone: "01000000011", lat: 30.362, lng: 30.508,
       menu: [
         { id: "m_afn_1", name: "فتة لحمة", price: 120 },
         { id: "m_afn_2", name: "محشي ورق عنب", price: 65 },
@@ -163,7 +163,7 @@ if (restaurantCount === 0) {
     },
     {
       id: "rest_la_rose", name: "لاروز", code: "1002", password: "1002",
-      phone: "01000000012", lat: 31.2156, lng: 29.9553,
+      phone: "01000000012", lat: 30.358, lng: 30.513,
       menu: [
         { id: "m_lrz_1", name: "باستا ألفريدو", price: 140 },
         { id: "m_lrz_2", name: "بيتزا مارجريتا", price: 110 },
@@ -172,7 +172,7 @@ if (restaurantCount === 0) {
     },
     {
       id: "rest_la_rotonda", name: "لاروتندا", code: "1003", password: "1003",
-      phone: "01000000013", lat: 31.2231, lng: 29.9652,
+      phone: "01000000013", lat: 30.366, lng: 30.505,
       menu: [
         { id: "m_lrt_1", name: "ستيك لحم", price: 220 },
         { id: "m_lrt_2", name: "دجاج مشوي", price: 130 },
@@ -181,7 +181,7 @@ if (restaurantCount === 0) {
     },
     {
       id: "rest_lorenzo", name: "لورينزو", code: "1004", password: "1004",
-      phone: "01000000014", lat: 31.1975, lng: 29.9412,
+      phone: "01000000014", lat: 30.355, lng: 30.502,
       menu: [
         { id: "m_lor_1", name: "لازانيا", price: 135 },
         { id: "m_lor_2", name: "ريزوتو مشروم", price: 125 },
@@ -190,7 +190,7 @@ if (restaurantCount === 0) {
     },
     {
       id: "rest_belban", name: "بلبن", code: "1005", password: "1005",
-      phone: "01000000015", lat: 31.2298, lng: 29.9781,
+      phone: "01000000015", lat: 30.368, lng: 30.516,
       menu: [
         { id: "m_bel_1", name: "رز بلبن", price: 20 },
         { id: "m_bel_2", name: "أم علي", price: 35 },
@@ -199,7 +199,7 @@ if (restaurantCount === 0) {
     },
     {
       id: "rest_kunafa_basbousa", name: "كنافة وبسبوسة", code: "1006", password: "1006",
-      phone: "01000000016", lat: 31.2044, lng: 29.9245,
+      phone: "01000000016", lat: 30.360, lng: 30.520,
       menu: [
         { id: "m_kb_1", name: "كنافة بالقشطة", price: 45 },
         { id: "m_kb_2", name: "بسبوسة بالقشطة", price: 30 },
@@ -208,7 +208,7 @@ if (restaurantCount === 0) {
     },
     {
       id: "rest_hadramout", name: "حضرموت", code: "1007", password: "1007",
-      phone: "01000000017", lat: 31.1887, lng: 29.9034,
+      phone: "01000000017", lat: 30.352, lng: 30.510,
       menu: [
         { id: "m_had_1", name: "مندي لحم", price: 160 },
         { id: "m_had_2", name: "مندي فراخ", price: 130 },
@@ -240,9 +240,10 @@ if (restaurantCount === 0) {
     db.prepare(`INSERT INTO admins (id, username, password_hash) VALUES (?, ?, ?)`)
       .run("admin_1", "admin", bcrypt.hashSync(adminPass, 10));
     // Company HQ + service radius, used to fence "اطلب أي شيء" + custom pickup requests.
-    db.prepare(`INSERT INTO settings (key, value) VALUES ('hq_lat', '31.2089')`).run();
-    db.prepare(`INSERT INTO settings (key, value) VALUES ('hq_lng', '29.9092')`).run();
-    db.prepare(`INSERT INTO settings (key, value) VALUES ('service_radius_km', '15')`).run();
+    // Coordinates centered on Sadat City, Menoufia, Egypt.
+    db.prepare(`INSERT INTO settings (key, value) VALUES ('hq_lat', '30.36')`).run();
+    db.prepare(`INSERT INTO settings (key, value) VALUES ('hq_lng', '30.51')`).run();
+    db.prepare(`INSERT INTO settings (key, value) VALUES ('service_radius_km', '20')`).run();
   });
   seedTx();
 
