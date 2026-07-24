@@ -104,12 +104,7 @@ export default function Dashboard({ restaurant, onLogout }) {
         <Section title={`جارية (${active.length})`}>
           <Grid>
             {active.map((o) => (
-              <OrderCard
-                key={o.id}
-                order={o}
-                statusLabel={STATUS_LABELS[o.status]}
-                onAdvance={(next) => handleStatus(o, next)}
-              />
+              <OrderCard key={o.id} order={o} statusLabel={STATUS_LABELS[o.status]} readonly />
             ))}
           </Grid>
           {active.length === 0 && <Empty text="لا يوجد أوردرات جارية" />}

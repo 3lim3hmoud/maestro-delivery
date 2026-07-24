@@ -317,6 +317,11 @@ app.get("/api/restaurants/me/orders", auth.requireRole("restaurant"), (req, res)
 
 app.patch("/api/orders/:id/status", auth.requireRole("restaurant"), async (req, res) => {
   const { status } = req.body;
+  // المطعم دوره يقتصر على القبول أو الرفض فقط — أي حالة بعد كده (تحضير/توصيل/تسليم)
+  // بيتحكم فيها الكابتن من تطبيقه بعد ما يستلم الأوردر، مش المطعم.
+  if (!["accepted", "rejected"].includes(status)) {
+    return res.status(403).json({ error: "المطعم يقدر بس يقبل أو يرفض الأوردر" });
+  }
   const row = db.prepare("SELECT * FROM orders WHERE id = ?").get(req.params.id);
   if (!row) return res.status(404).json({ error: "الأوردر غير موجود" });
   if (row.restaurant_id !== req.auth.restaurantId) return res.status(403).json({ error: "مش أوردر بتاعك" });

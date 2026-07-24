@@ -1,14 +1,6 @@
 import React from "react";
 
-const NEXT_STEP = {
-  accepted: { label: "بدء التحضير", next: "preparing" },
-  preparing: { label: "خرج للتوصيل", next: "out_for_delivery" },
-  out_for_delivery: { label: "تم التسليم", next: "delivered" },
-};
-
-export default function OrderCard({ order, isNew, statusLabel, onAccept, onReject, onAdvance, readonly }) {
-  const step = NEXT_STEP[order.status];
-
+export default function OrderCard({ order, isNew, statusLabel, onAccept, onReject, readonly }) {
   return (
     <div className={`order-card ${isNew ? "is-new" : ""}`}>
       <span className={`status-badge status-${order.status}`}>{statusLabel}</span>
@@ -40,11 +32,7 @@ export default function OrderCard({ order, isNew, statusLabel, onAccept, onRejec
         </div>
       )}
 
-      {!readonly && step && (
-        <div className="order-actions">
-          <button className="btn btn-print" onClick={() => onAdvance(step.next)}>{step.label}</button>
-        </div>
-      )}
+      {/* بعد القبول، الأوردر بيبقى متاح للكباتن يستلموه، والمطعم بيتابع حالته هنا بس من غير تحكم */}
     </div>
   );
 }
