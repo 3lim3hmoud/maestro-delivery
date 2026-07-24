@@ -45,7 +45,7 @@ export default function ActiveOrderScreen({ order, onDone }) {
     const next = current.status === "preparing" ? "out_for_delivery" : "delivered";
     const updated = await setOrderStatus(current.id, next);
     setCurrent(updated);
-    if (next === "delivered") setTimeout(onDone, 800);
+    if (next === "delivered") setTimeout(() => onDone(updated), 800);
   }
 
   return (

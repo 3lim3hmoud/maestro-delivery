@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { loginRestaurant } from "../api.js";
 import { LogoLockup } from "./Logo.jsx";
 
-export default function Login({ onLogin, onGoAdmin }) {
+export default function Login({ onLogin, onGoAdmin, onGoEmployee }) {
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -42,6 +42,9 @@ export default function Login({ onLogin, onGoAdmin }) {
         {error && <div className="error-text">{error}</div>}
         <button className="btn btn-primary" disabled={loading || !code || !password}>
           {loading ? "جارٍ الدخول..." : "دخول"}
+        </button>
+        <button type="button" className="btn-link" onClick={onGoEmployee}>
+          دخول الموظفين
         </button>
         <button type="button" className="btn-link" onClick={onGoAdmin}>
           دخول كأدمن

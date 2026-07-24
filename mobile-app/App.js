@@ -6,10 +6,11 @@ import MenuScreen from "./src/screens/MenuScreen.jsx";
 import CheckoutScreen from "./src/screens/CheckoutScreen.jsx";
 import TrackingScreen from "./src/screens/TrackingScreen.jsx";
 import OrderHistoryScreen from "./src/screens/OrderHistoryScreen.jsx";
+import CustomRequestScreen from "./src/screens/CustomRequestScreen.jsx";
 import useCustomerProfile from "./src/useCustomerProfile.js";
 
 export default function App() {
-  const [screen, setScreen] = useState("splash"); // splash -> restaurants -> menu -> checkout -> tracking -> history
+  const [screen, setScreen] = useState("splash"); // splash -> restaurants -> menu -> checkout -> tracking -> history -> custom-request
   const [restaurant, setRestaurant] = useState(null);
   const [cart, setCart] = useState(null);
   const [order, setOrder] = useState(null);
@@ -26,6 +27,7 @@ export default function App() {
             setScreen("menu");
           }}
           onOpenHistory={() => setScreen("history")}
+          onOpenCustomRequest={() => setScreen("custom-request")}
         />
       )}
       {screen === "menu" && (
@@ -74,6 +76,15 @@ export default function App() {
               restaurantId: pastOrder.restaurantId,
             });
             setScreen("checkout");
+          }}
+        />
+      )}
+      {screen === "custom-request" && (
+        <CustomRequestScreen
+          onBack={() => setScreen("restaurants")}
+          onPlaced={(o) => {
+            setOrder(o);
+            setScreen("tracking");
           }}
         />
       )}

@@ -16,15 +16,16 @@ function verifyToken(token) {
   return jwt.verify(token, SECRET);
 }
 
-/** Express middleware: requires a valid Bearer token with the given role, attaches req.auth */
-function requireRole(role) {
+/** Express middleware: requires a valid Bearer token with one of the given role(s), attaches req.auth */
+function requireRole(roleOrRoles) {
+  const allowed = Array.isArray(roleOrRoles) ? roleOrRoles : [roleOrRoles];
   return (req, res, next) => {
     const header = req.headers.authorization || "";
     const token = header.startsWith("Bearer ") ? header.slice(7) : null;
     if (!token) return res.status(401).json({ error: "لازم تسجل دخول" });
     try {
       const decoded = verifyToken(token);
-      if (role && decoded.role !== role) {
+      if (allowed.length && !allowed.includes(decoded.role)) {
         return res.status(403).json({ error: "غير مسموح لك بهذا الإجراء" });
       }
       req.auth = decoded;

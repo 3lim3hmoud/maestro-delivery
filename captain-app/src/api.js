@@ -45,3 +45,28 @@ export async function setOrderStatus(orderId, status) {
     body: JSON.stringify({ status }),
   }));
 }
+
+export async function getMyStatus() {
+  return handle(await fetch(`${API_BASE}/api/couriers/me`, { headers: authHeaders() }));
+}
+
+export async function goOnline() {
+  return handle(await fetch(`${API_BASE}/api/couriers/me/go-online`, { method: "POST", headers: authHeaders() }));
+}
+
+export async function goOffline() {
+  return handle(await fetch(`${API_BASE}/api/couriers/me/go-offline`, { method: "POST", headers: authHeaders() }));
+}
+
+// Captain presses this after physically returning to company HQ — only then do they rejoin the queue.
+export async function returnToBase() {
+  return handle(await fetch(`${API_BASE}/api/couriers/me/return-to-base`, { method: "POST", headers: authHeaders() }));
+}
+
+export async function rateCustomer(orderId, rating) {
+  return handle(await fetch(`${API_BASE}/api/couriers/orders/${orderId}/rate-customer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ rating }),
+  }));
+}

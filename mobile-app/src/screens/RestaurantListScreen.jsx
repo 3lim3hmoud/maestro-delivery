@@ -15,7 +15,7 @@ const CUISINE_EMOJI = {
   rest_hadramout: "🍛",
 };
 
-export default function RestaurantListScreen({ onSelect, onOpenHistory }) {
+export default function RestaurantListScreen({ onSelect, onOpenHistory, onOpenCustomRequest }) {
   const [restaurants, setRestaurants] = useState([]);
   const [query, setQuery] = useState("");
 
@@ -30,9 +30,14 @@ export default function RestaurantListScreen({ onSelect, onOpenHistory }) {
       <LinearGradient colors={gradients.dark} style={styles.header}>
         <View style={styles.headerTop}>
           <LogoMark size={38} />
-          <TouchableOpacity style={styles.locationPill} onPress={onOpenHistory}>
-            <Text style={styles.locationPillText}>📋 طلباتي</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <TouchableOpacity style={styles.locationPill} onPress={onOpenHistory}>
+              <Text style={styles.locationPillText}>📋 طلباتي</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.locationPill} onPress={onOpenCustomRequest}>
+              <Text style={styles.locationPillText}>🛍️ اطلب أي حاجة</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.greeting}>عايز تاكل إيه النهاردة؟</Text>
         <Text style={styles.tagline}>مطاعمك المفضلة على بعد دقايق منك</Text>
@@ -99,11 +104,11 @@ const styles = StyleSheet.create({
   headerTop: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center" },
   locationPill: {
     backgroundColor: "rgba(255,255,255,0.08)",
-    paddingHorizontal: 12,
+    paddingHorizontal: 9,
     paddingVertical: 6,
     borderRadius: radius.pill,
   },
-  locationPillText: { color: colors.textSoft, fontSize: 12.5, fontWeight: "600" },
+  locationPillText: { color: colors.textSoft, fontSize: 11, fontWeight: "600" },
   greeting: { ...typography.h1, color: colors.white, textAlign: "right", marginTop: spacing.lg },
   tagline: { color: colors.textSoft, textAlign: "right", marginTop: 6, fontSize: 13.5 },
   searchBox: {

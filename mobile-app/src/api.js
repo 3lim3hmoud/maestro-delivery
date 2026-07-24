@@ -17,6 +17,22 @@ export async function placeOrder(payload) {
   return res.json();
 }
 
+export async function getServiceArea() {
+  const res = await fetch(`${API_BASE}/api/settings/service-area`);
+  return res.json();
+}
+
+// "اطلب أي شيء" — non-restaurant delivery request (medicine, documents, a gift, anything).
+export async function submitCustomRequest(payload) {
+  const res = await fetch(`${API_BASE}/api/custom-requests`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error((await res.json()).error || "حصل خطأ في إرسال الطلب");
+  return res.json();
+}
+
 export async function getCustomerOrders(phone) {
   const res = await fetch(`${API_BASE}/api/customers/orders?phone=${encodeURIComponent(phone)}`);
   if (!res.ok) throw new Error((await res.json()).error || "حصل خطأ في جلب طلباتك السابقة");

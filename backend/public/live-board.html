@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8" />
+<title>المايسترو — شاشة المقر</title>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<style>
+  :root {
+    --bg: #0D0D0D; --surface: #1C1C1E; --line: #2E2E31;
+    --yellow: #FFC700; --green: #2ECC71; --blue: #4DA6FF; --white: #fff; --soft: #A9A9AE;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--white);
+    font-family: 'Tajawal', 'Cairo', sans-serif; height: 100vh; overflow: hidden;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--line); background: #161616;
+  }
+  header h1 { font-size: 26px; margin: 0; }
+  header .clock { font-family: monospace; font-size: 22px; color: var(--yellow); }
+  .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; height: calc(100vh - 76px); }
+  .col { border-inline-start: 1px solid var(--line); padding: 16px; overflow-y: auto; }
+  .col h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; margin-top: 0; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot.new { background: var(--yellow); } .dot.preparing { background: var(--blue); }
+  .dot.out { background: #FF9F1C; } .dot.delivered { background: var(--green); }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 10px; animation: pop 0.4s ease;
+  }
+  @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .card .code { font-family: monospace; font-size: 12px; color: var(--soft); }
+  .card .who { font-weight: 700; margin: 4px 0; }
+  .card .meta { font-size: 12px; color: var(--soft); }
+  .empty { color: var(--soft); text-align: center; padding: 30px 0; font-size: 13px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🎼 المايسترو — لوحة المقر اللحظية</h1>
+    <div class="clock" id="clock"></div>
+  </header>
+  <div class="board">
+    <div class="col"><h2><span class="dot new"></span> طلبات جديدة (<span id="count-new">0</span>)</h2><div id="col-new"></div></div>
+    <div class="col"><h2><span class="dot preparing"></span> جاري التجهيز (<span id="count-preparing">0</span>)</h2><div id="col-preparing"></div></div>
+    <div class="col"><h2><span class="dot out"></span> خرج مع الكابتن (<span id="count-out">0</span>)</h2><div id="col-out"></div></div>
+    <div class="col"><h2><span class="dot delivered"></span> تم التسليم (<span id="count-delivered">0</span>)</h2><div id="col-delivered"></div></div>
+  </div>
+
+<script>
+  // Change this if the backend runs on a different host than this page.
+  const API_BASE = window.location.origin;
+  const socket = io(API_BASE);
+  socket.emit("board:join");
+  socket.on("board:update", render);
+
+  function render(board) {
+    for (const stage of ["new", "preparing", "out", "delivered"]) {
+      const list = board[stage] || [];
+      document.getElementById(`count-${stage}`).textContent = list.length;
+      const col = document.getElementById(`col-${stage}`);
+      col.innerHTML = list.length
+        ? list.map(cardHtml).join("")
+        : '<div class="empty">لا يوجد</div>';
+    }
+  }
+  function cardHtml(o) {
+    const time = new Date(o.created_at).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+    return `<div class="card">
+      <div class="code">${o.order_code || o.id}</div>
+      <div class="who">${o.customer_name || "عميل"} — ${o.total} ج.م</div>
+      <div class="meta">${o.restaurant_name}${o.courier_name ? " · " + o.courier_name : ""} · ${time}</div>
+    </div>`;
+  }
+
+  function tickClock() {
+    document.getElementById("clock").textContent = new Date().toLocaleTimeString("ar-EG");
+  }
+  setInterval(tickClock, 1000);
+  tickClock();
+</script>
+</body>
+</html>
