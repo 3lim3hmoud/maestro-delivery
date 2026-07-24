@@ -9,6 +9,8 @@ export default function AvailableOrdersScreen({ onClaimed }) {
   const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState("off_duty"); // off_duty | available | busy | returning
   const [toggling, setToggling] = useState(false);
+  const [claimError, setClaimError] = useState("");
+  const [claimingId, setClaimingId] = useState(null);
 
   function load() {
     getAvailableOrders().then(setOrders).catch(() => {});
@@ -41,12 +43,18 @@ export default function AvailableOrdersScreen({ onClaimed }) {
   }
 
   async function handleClaim(orderId) {
+    setClaimError("");
+    setClaimingId(orderId);
     try {
       const order = await claimOrder(orderId);
       onClaimed(order);
     } catch (e) {
-      // order likely already taken by another courier, or you're not in the queue yet — list refreshes via socket
+      // Show the real reason instead of failing silently — e.g. someone else already took it,
+      // or you're not marked "available" yet.
+      setClaimError(e.message || "معرفتش تستلم الأوردر ده، جرب تاني");
       load();
+    } finally {
+      setClaimingId(null);
     }
   }
 
@@ -70,6 +78,8 @@ export default function AvailableOrdersScreen({ onClaimed }) {
 
       <Text style={styles.header}>🎼 أوردرات جاهزة للتوصيل</Text>
 
+      {!!claimError && <Text style={styles.claimError}>⚠️ {claimError}</Text>}
+
       {status !== "available" ? (
         <Text style={styles.empty}>
           {status === "off_duty" ? "اضغط أونلاين عشان تدخل الدور وتستلم أوردرات" : "خلص اللي عندك الأول"}
@@ -85,8 +95,12 @@ export default function AvailableOrdersScreen({ onClaimed }) {
             <View style={styles.card}>
               <Text style={styles.total}>{item.total} ج.م — {item.items.length} صنف</Text>
               <Text style={styles.customer}>{item.customerName || "عميل"} · {item.customerPhone}</Text>
-              <TouchableOpacity style={styles.btn} onPress={() => handleClaim(item.id)}>
-                <Text style={styles.btnText}>استلام الأوردر</Text>
+              <TouchableOpacity
+                style={[styles.btn, claimingId === item.id && { opacity: 0.6 }]}
+                disabled={claimingId === item.id}
+                onPress={() => handleClaim(item.id)}
+              >
+                <Text style={styles.btnText}>{claimingId === item.id ? "جارٍ الاستلام..." : "استلام الأوردر"}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -105,6 +119,7 @@ const styles = StyleSheet.create({
   statusLabel: { color: colors.white, fontWeight: "700" },
   header: { color: colors.white, fontSize: 20, fontWeight: "800", textAlign: "center", padding: 16 },
   empty: { color: colors.textSoft, textAlign: "center", marginTop: 40, paddingHorizontal: 24 },
+  claimError: { color: colors.danger, textAlign: "center", paddingHorizontal: 20, marginBottom: 8, fontWeight: "600" },
   card: { backgroundColor: colors.surface, borderRadius: radius.md, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: colors.line },
   total: { color: colors.white, fontSize: 17, fontWeight: "700", textAlign: "right" },
   customer: { color: colors.textSoft, textAlign: "right", marginTop: 4, marginBottom: 12 },
